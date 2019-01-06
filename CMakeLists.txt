@@ -98,3 +98,8 @@ export(EXPORT fluids-targets FILE ${CMAKE_CURRENT_BINARY_DIR}/FluidsTargets.cmak
 export(PACKAGE Fluids)
 
 add_subdirectory(test)
+
+##############################################
+## Create package
+
+include(CPack)

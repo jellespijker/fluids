@@ -1,0 +1,31 @@
+image: registry.gitlab.com/han-thesis/fluids:latest
+
+stages:
+  - test
+  - publish
+
+unittest:
+  type: test
+
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make
+    - ./test/test_main
+
+release:
+  type: deploy
+
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake -DCMAKE_BUILD_TYPE=Release ..
+    - make
+    - cpack -G TGZ
+    - mv *.tar.gz ..
+    - cd ..
+
+  artifacts:
+    paths:
+      - ./*.tar.gz
