@@ -7,6 +7,9 @@ stages:
 unittest:
   type: test
 
+  before_script:
+    - docker login -u $CI_USER -p $CI_BUILD_TOKEN registry.gitlab.com
+
   script:
     - mkdir -p build
     - cd build
@@ -16,6 +19,9 @@ unittest:
 
 release:
   type: publish
+
+  before_script:
+    - docker login -u $CI_USER -p $CI_BUILD_TOKEN registry.gitlab.com
 
   script:
     - mkdir -p build
