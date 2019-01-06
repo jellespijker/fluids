@@ -62,7 +62,7 @@ release:
     - cmake -DCMAKE_BUILD_TYPE=Release ..
     - make
     - cpack -G TGZ
-    - mv *.tar.gz ..
+    - mv *.tar.gz ../libfluids-Linux.tar.gz
     - cd ..
 
   artifacts:
