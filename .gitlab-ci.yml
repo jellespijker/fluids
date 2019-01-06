@@ -1,11 +1,10 @@
-image: registry.gitlab.com/han-thesis/fluids
-
 stages:
   - test
   - publish
 
 unittest:
   type: test
+  image: registry.gitlab.com/han-thesis/fluids
 
   script:
     - mkdir -p build
@@ -14,8 +13,28 @@ unittest:
     - make
     - ./test/test_main
 
+code_quality:
+  type: test
+  image: docker:stable
+  variables:
+    DOCKER_DRIVER: overlay2
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker run
+      --env SOURCE_CODE="$PWD"
+      --volume "$PWD":/code
+      --volume /var/run/docker.sock:/var/run/docker.sock
+      "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+
 release:
   type: publish
+  image: registry.gitlab.com/han-thesis/fluids
 
   script:
     - mkdir -p build
