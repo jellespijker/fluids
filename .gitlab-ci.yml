@@ -1,4 +1,4 @@
-image: registry.gitlab.com/han-thesis/fluids:latest
+image: registry.gitlab.com/han-thesis/fluids:be998501f
 
 stages:
   - test
