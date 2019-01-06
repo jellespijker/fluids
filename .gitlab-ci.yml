@@ -15,7 +15,7 @@ unittest:
     - ./test/test_main
 
 release:
-  type: deploy
+  type: publish
 
   script:
     - mkdir -p build
