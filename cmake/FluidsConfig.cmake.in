@@ -1,0 +1,16 @@
+get_filename_component(Fluids_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+include(CMakeFindDependencyMacro)
+
+list(APPEND CMAKE_MODULE_PATH ${Fluids_CMAKE_DIR})
+
+# NOTE Had to use find_package because find_dependency does not support COMPONENTS or MODULE until 3.8.0
+
+find_dependency(Boost)
+find_dependency(Eigen3 REQUIRED NO_MODULE)
+list(REMOVE_AT CMAKE_MODULE_PATH -1)
+
+if(NOT TARGET Fluids::fluids)
+    include("${Fluids_CMAKE_DIR}/FluidsTargets.cmake")
+endif()
+
+set(Fluids_LIBRARIES Fluids::fluids)
