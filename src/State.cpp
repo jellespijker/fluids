@@ -28,17 +28,21 @@
 namespace Fluids {
 
 State::State() : m_static_pressure(new quantity<si::pressure>(1.e5 * si::pascals)),
-                 m_speed(new quantity<si::velocity>(0. * si::meters_per_second)), {
+                 m_speed(new quantity<si::velocity>(0. * si::meters_per_second)) {
 
 }
 
 State::State(const State &other) : m_static_pressure(new quantity<si::pressure>(*other.m_static_pressure)),
-                                   m_speed(new quantity<si::velocity>(*other.m_speed)), {
+                                   m_speed(new quantity<si::velocity>(*other.m_speed)) {
 
 }
 
 State &State::operator=(const State &other) {
-  return <#initializer#>;
+  if (this == &other)
+    return *this;
+  m_static_pressure = std::make_shared<quantity<si::pressure>>(*other.m_static_pressure);
+  m_speed = std::make_shared<quantity<si::velocity>>(*other.m_speed);
+  return *this;
 }
 
 const std::shared_ptr<quantity<si::velocity>> &State::Get_Speed() const {
