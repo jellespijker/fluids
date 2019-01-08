@@ -17,6 +17,7 @@ set(SRC_FILES
         src/Functor.h
         src/Solver.cpp
         src/System.cpp
+        src/State.cpp
         src/Liquid.cpp
         src/FluidComponents.cpp
         src/Pipes.cpp
