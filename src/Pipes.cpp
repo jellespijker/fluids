@@ -30,7 +30,7 @@
 
 namespace Fluids {
 Pipes::Pipes() :
-    FluidComponents(std::make_shared<Liquid>()),
+    FluidComponents(std::make_shared<Liquid>(), std::make_shared<Liquid>()),
     m_diameter(new quantity<si::length>(0. * si::meter)),
     m_length(new quantity<si::length>(0. * si::meter)),
     m_roughness(new quantity<si::length>(0. * si::meter)),
@@ -38,8 +38,8 @@ Pipes::Pipes() :
 
 }
 
-Pipes::Pipes(std::shared_ptr<Liquid> liquid) :
-    FluidComponents(liquid),
+Pipes::Pipes(const std::shared_ptr<Liquid> &liquid_u, const std::shared_ptr<Liquid> &liquid_v) :
+    FluidComponents(liquid_u, liquid_v),
     m_diameter(new quantity<si::length>(0. * si::meter)),
     m_length(new quantity<si::length>(0. * si::meter)),
     m_roughness(new quantity<si::length>(0. * si::meter)),
@@ -57,7 +57,7 @@ Pipes::Pipes(const Fluids::Pipes &other) :
 }
 
 Pipes::Pipes(quantity<si::length> diameter, quantity<si::length> length, quantity<si::length> roughness) :
-    FluidComponents(std::make_shared<Liquid>()),
+    FluidComponents(std::make_shared<Liquid>(), std::make_shared<Liquid>()),
     m_diameter(new quantity<si::length>(diameter)),
     m_length(new quantity<si::length>(length)),
     m_roughness(new quantity<si::length>(roughness)),
@@ -77,14 +77,14 @@ Pipes &Pipes::operator=(const Fluids::Pipes &other) {
 }
 
 std::shared_ptr<quantity<si::pressure>> Pipes::Get_DeltaPressure() {
-  quantity<si::dimensionless> re = Pipes::Reynolds(*this->Get_Liquid()->Get_Speed(),
+  quantity<si::dimensionless> re = Pipes::Reynolds(*this->Get_Liquid(Vertex::u)->Get_Speed(),
                                                    *this->Get_Diameter(),
-                                                   *this->Get_Liquid()->Get_Density(),
-                                                   *this->Get_Liquid()->Get_Dynamic_viscosity());
+                                                   *this->Get_Liquid(Vertex::u)->Get_Density(),
+                                                   *this->Get_Liquid(Vertex::u)->Get_Dynamic_viscosity());
   quantity<si::dimensionless> f = Pipes::Haaland(re, *this->Get_Relative_roughness());
   *Pipes::m_deltapressure =
       0.81056946914 * f * *this->Get_Length() * pow<2>(*this->Get_Volumetricflow())
-          * *this->Get_Liquid()->Get_Density().get()
+          * *this->Get_Liquid(Vertex::u)->Get_Density().get()
           / pow<5>(*this->Get_Diameter());
   return m_deltapressure;
 }

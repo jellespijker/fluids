@@ -29,7 +29,8 @@
 namespace Fluids {
 
 Liquid::Liquid() :
-    State(),
+    m_static_pressure(new quantity<si::pressure>(1.e5 * si::pascals)),
+    m_speed(new quantity<si::velocity>(0. * si::meters_per_second)),
     m_height(new quantity<si::length>(0. * si::meter)),
     m_density(new quantity<si::mass_density>(1000. * si::kilogram_per_cubic_meter)),
     m_dynamic_viscosity(new quantity<si::dynamic_viscosity>(1.15e-3 * si::pascals * si::seconds)),
@@ -40,7 +41,8 @@ Liquid::Liquid() :
 }
 
 Liquid::Liquid(const Liquid &other) :
-    State(other),
+    m_static_pressure(new quantity<si::pressure>(*other.m_static_pressure)),
+    m_speed(new quantity<si::velocity>(*other.m_speed)),
     m_height(new quantity<si::length>(*other.m_height)),
     m_density(new quantity<si::mass_density>(*other.m_density)),
     m_dynamic_viscosity(new quantity<si::dynamic_viscosity>(*other.m_dynamic_viscosity)),
@@ -53,7 +55,8 @@ Liquid::Liquid(const Liquid &other) :
 Liquid &Liquid::operator=(const Liquid &other) {
   if (this == &other)
     return *this;
-  State::operator=(other);
+  m_static_pressure = std::make_shared<quantity<si::pressure>>(*other.m_static_pressure);
+  m_speed = std::make_shared<quantity<si::velocity>>(*other.m_speed);
   m_height = std::make_shared<quantity<si::length>>(*other.m_height);
   m_density = std::make_shared<quantity<si::mass_density>>(*other.m_density);
   m_dynamic_viscosity = std::make_shared<quantity<si::dynamic_viscosity>>(*other.m_dynamic_viscosity);
@@ -100,5 +103,21 @@ const std::shared_ptr<quantity<si::dynamic_viscosity>> &Liquid::Get_Dynamic_visc
 
 void Liquid::Set_Dynamic_viscosity(const std::shared_ptr<quantity<si::dynamic_viscosity>> &dynamic_viscosity) {
   Liquid::m_dynamic_viscosity = dynamic_viscosity;
+}
+
+const std::shared_ptr<quantity<si::velocity>> &Liquid::Get_Speed() const {
+  return m_speed;
+}
+
+void Liquid::Set_Speed(const std::shared_ptr<quantity<si::velocity>> &speed) {
+  Liquid::m_speed = speed;
+}
+
+const std::shared_ptr<quantity<si::pressure>> &Liquid::Get_Static_pressure() const {
+  return m_static_pressure;
+}
+
+void Liquid::Set_Static_pressure(const std::shared_ptr<quantity<si::pressure>> &static_pressure) {
+  Liquid::m_static_pressure = static_pressure;
 }
 }

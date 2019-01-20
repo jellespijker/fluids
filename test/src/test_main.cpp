@@ -29,6 +29,7 @@
 #include <fluids/Liquid.h>
 #include <fluids/Pipes.h>
 #include <fluids/System.h>
+#include <fluids/Solver.h>
 
 TEST(LiquidTest, StandardWater) {
   Fluids::Liquid water;
@@ -66,7 +67,8 @@ TEST(LiquidTest, AssignOperator) {
 
 TEST(PipeTest, Pipes) {
   auto water = std::make_shared<Fluids::Liquid>();
-  Fluids::Pipes pipe(water);
+  auto water2 = std::make_shared<Fluids::Liquid>();
+  Fluids::Pipes pipe(water, water);
   *pipe.Get_Diameter() = 0.2 * si::meters;
   ASSERT_NEAR(pipe.Get_CrossSection()->value(), 0.0314159, 1e-6);
   *pipe.Get_Length() = 20. * si::meters;
@@ -116,7 +118,7 @@ TEST(PipeTest, SimpleInitialization) {
 TEST(SystemTest, MakeGraph) {
   Fluids::Liquid water;
   Fluids::System system(water, 6);
-  auto p0 = std::make_shared<Fluids::Pipes>(0.2 * si::meter, 10. * si::meter, 46e-5 * si::meters);
+  auto p0 = std::make_shared<Fluids::Pipes>(0.2 * si::meter, 10. * si::meter, 4.6e-5 * si::meters);
   system.add_FluidComponent(p0, 0, 1);
   auto p1(p0);
   system.add_FluidComponent(p1, 1, 2);
@@ -132,4 +134,36 @@ TEST(SystemTest, MakeGraph) {
   system.Set_Known_Static_Pressure(0, static_cast<quantity<si::pressure>>(2. * si::bar));
   system.Set_Known_Static_Pressure(5, static_cast<quantity<si::pressure>>(1. * si::bar));
   ASSERT_TRUE(true); // TODO write test criteria
+}
+
+TEST(SystemTest, SimpleSystem) {
+  Fluids::Liquid water;
+  Fluids::System sys(water, 2);
+  auto p0 = std::make_shared<Fluids::Pipes>(0.2 * si::meter,
+                                            10. * si::meter,
+                                            static_cast<quantity<si::length>>(46. * si::micrometers));
+  sys.add_FluidComponent(p0, 0, 1);
+  sys.Set_Known_Speed(0, 2. * si::meters_per_second);
+  sys.Set_Known_Speed(1, 2. * si::meters_per_second);
+  sys.Set_Known_Static_Pressure(0, static_cast<quantity<si::pressure>>(2. * si::bar));
+  sys.Set_Known_Static_Pressure(1, static_cast<quantity<si::pressure>>(1.983 * si::bar));
+  sys.Initialize();
+}
+
+TEST(SolverTest, SimpleSystem) {
+  Fluids::Liquid water;
+  auto sys = std::make_shared<Fluids::System>(water, 2);
+  auto p0 = std::make_shared<Fluids::Pipes>(0.2 * si::meter,
+                                            10. * si::meter,
+                                            static_cast<quantity<si::length>>(46. * si::micrometers));
+  sys->add_FluidComponent(p0, 0, 1);
+  sys->Set_Known_Speed(0, 2. * si::meters_per_second);
+  sys->Set_Known_Static_Pressure(0, static_cast<quantity<si::pressure>>(2. * si::bar));
+  sys->Initialize();
+
+  Fluids::Solver solver(sys);
+
+  solver.Solve();
+  std::cout << *sys->Get_Liquid(1)->Get_Static_pressure() << std::endl;
+  std::cout << *sys->Get_Liquid(1)->Get_Speed() << std::endl;
 }

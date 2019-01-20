@@ -17,9 +17,10 @@ set(SRC_FILES
         src/Functor.h
         src/Solver.cpp
         src/System.cpp
-        src/State.cpp
         src/Liquid.cpp
         src/FluidComponents.cpp
+        src/TransportEdge.h
+        src/TransportEdge.cpp
         src/Pipes.cpp
         )
 
@@ -37,7 +38,7 @@ target_include_directories(fluids
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         )
 
-target_compile_features(fluids PRIVATE cxx_std_14)
+target_compile_features(fluids PRIVATE cxx_std_17)
 target_compile_options(fluids PRIVATE $<$<CXX_COMPILER_ID:GNU>:-Wall>)
 
 target_link_libraries(fluids

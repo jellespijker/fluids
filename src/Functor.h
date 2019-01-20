@@ -82,7 +82,7 @@ public:
       *pressure[n_speed - j] = x(j) * si::pascals; // TODO write more generic get unit from type
     }
 
-    // TODO return vector
+    dvec = m_system->Get_Return_vec();
     return 0;
   }
 

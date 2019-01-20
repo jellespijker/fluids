@@ -24,17 +24,19 @@
 #ifndef FLUIDS_LIQUID_H
 #define FLUIDS_LIQUID_H
 
-#include "State.h"
+#include <memory>
+
+#include "Units.h"
 
 namespace Fluids {
-class Liquid : public State {
+class Liquid {
  public:
   Liquid();
   Liquid(const Liquid &other);
 
   Liquid &operator=(const Liquid &other);
 
-  ~Liquid() override = default;
+  ~Liquid() = default;
 
   const std::shared_ptr<quantity<si::mass_density>> &Get_Density() const;
   void Set_Density(const std::shared_ptr<quantity<si::mass_density>> &density);
@@ -45,11 +47,19 @@ class Liquid : public State {
   const std::shared_ptr<quantity<si::length>> &Get_Height() const;
   void Set_Height(const std::shared_ptr<quantity<si::length>> &height);
 
+  const std::shared_ptr<quantity<si::velocity>> &Get_Speed() const;
+  void Set_Speed(const std::shared_ptr<quantity<si::velocity>> &speed);
+
+  const std::shared_ptr<quantity<si::pressure>> &Get_Static_pressure() const;
+  void Set_Static_pressure(const std::shared_ptr<quantity<si::pressure>> &static_pressure);
+
   const std::shared_ptr<quantity<si::pressure>> &Get_Dynamic_pressure() const;
   const std::shared_ptr<quantity<si::pressure>> &Get_Potential_pressure() const;
   const std::shared_ptr<quantity<si::pressure>> &Get_Bernoulli() const;
 
  private:
+  std::shared_ptr<quantity<si::pressure>> m_static_pressure;
+  std::shared_ptr<quantity<si::velocity>> m_speed;
   std::shared_ptr<quantity<si::length>> m_height;
   std::shared_ptr<quantity<si::mass_density>> m_density;
   std::shared_ptr<quantity<si::dynamic_viscosity>> m_dynamic_viscosity;

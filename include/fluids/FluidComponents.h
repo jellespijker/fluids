@@ -30,32 +30,42 @@
 #include "Liquid.h"
 
 namespace Fluids {
+enum Vertex {
+  u = 0,
+  v = 1
+};
+
 class FluidComponents {
- public:
+public:
   FluidComponents();
-  explicit FluidComponents(std::shared_ptr<Liquid> liquid);
+  FluidComponents(const std::shared_ptr<Liquid> &liquid_u, const std::shared_ptr<Liquid> &liquid_v);
   FluidComponents(const FluidComponents &other);
 
   virtual ~FluidComponents() = default;
 
   virtual FluidComponents &operator=(const FluidComponents &other);
 
-  virtual std::shared_ptr<quantity<si::pressure>> Get_DeltaPressure() = 0;
+  virtual std::shared_ptr<quantity<si::pressure>> Get_DeltaPressure();
   virtual std::shared_ptr<quantity<si::mass_flow>> Get_Massflow();
   virtual std::shared_ptr<quantity<si::volumetric_flow>> Get_Volumetricflow();
+  virtual std::shared_ptr<quantity<si::pressure>> Get_Bernoulli_balance();
 
   virtual const std::shared_ptr<quantity<si::area>> &Get_CrossSection() const;
   virtual void Set_CrossSection(const std::shared_ptr<quantity<si::area>> &crosssection);
 
-  const std::shared_ptr<Liquid> &Get_Liquid() const;
-  void Set_Liquid(const std::shared_ptr<Liquid> &liquid);
+  const std::shared_ptr<Liquid> &Get_Liquid(const Vertex &vertex) const;
+  void Set_Liquid(const Vertex &vertex, const std::shared_ptr<Liquid> &liquid);
 
- protected:
+  virtual bool isTransportEdge() const;
+
+protected:
   std::shared_ptr<quantity<si::area>> m_crosssection;
   std::shared_ptr<quantity<si::mass_flow>> m_massflow;
   std::shared_ptr<quantity<si::volumetric_flow>> m_volumetricflow;
   std::shared_ptr<quantity<si::pressure>> m_deltapressure;
-  std::shared_ptr<Liquid> m_liquid;
+  std::shared_ptr<quantity<si::pressure>> m_bernoulli_balance;
+  std::shared_ptr<Liquid> m_liquid_u;
+  std::shared_ptr<Liquid> m_liquid_v;
 };
 }
 

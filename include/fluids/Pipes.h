@@ -30,7 +30,7 @@ namespace Fluids {
 class Pipes : public FluidComponents {
  public:
   Pipes();
-  explicit Pipes(std::shared_ptr<Liquid> liquid);
+  Pipes(const std::shared_ptr<Liquid> &liquid_u, const std::shared_ptr<Liquid> &liquid_v);
   Pipes(const Pipes &other);
   Pipes(quantity<si::length> diameter, quantity<si::length> length, quantity<si::length> roughness);
 

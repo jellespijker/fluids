@@ -21,46 +21,24 @@
 // SOFTWARE.
 //
 
-#include <Eigen/Eigen>
-#include <unsupported/Eigen/NonLinearOptimization>
+#ifndef LIBFLUIDS_TRANSPORTEDGE_H
+#define LIBFLUIDS_TRANSPORTEDGE_H
 
-#include <fluids/Solver.h>
-#include "../include/fluids/Solver.h"
-#include "Functor.h"
+#include "../include/fluids/FluidComponents.h"
 
 namespace Fluids {
+class TransportEdge : public FluidComponents {
+public:
+  TransportEdge();
+  TransportEdge(const std::shared_ptr<Liquid> &liquid_u, const std::shared_ptr<Liquid> &liquid_v);
+  explicit TransportEdge(const FluidComponents &other);
 
-Solver::Solver() {
+  ~TransportEdge() override = default;
 
+  FluidComponents &operator=(const FluidComponents &other) override;
+
+  bool isTransportEdge() const override;
+  std::shared_ptr<quantity<si::volumetric_flow>> Get_Volumetricflow() override;
+};
 }
-
-Solver::Solver(const std::shared_ptr<System> &system) : m_system(system) {
-
-}
-
-void Solver::Solve() {
-  if (m_system == nullptr)
-    throw std::logic_error("No system to solve.");
-  System_Functor func(m_system);
-  Eigen::HybridNonLinearSolver<System_Functor> dl(func);
-  auto x_initial = m_system->Get_Initial_vector();
-  x_initial(0) = 2.0;
-  x_initial(1) = 200000 - 10193.0 - 8587.;
-  dl.solve(x_initial);
-}
-
-void Solver::Solve(const std::shared_ptr<System> &system) {
-  if (system != Get_System())
-    Set_System(system);
-  Solver();
-}
-
-const std::shared_ptr<System> &Solver::Get_System() const {
-  return m_system;
-}
-
-void Solver::Set_System(const std::shared_ptr<System> &system) {
-  Solver::m_system = system;
-}
-
-}
+#endif //LIBFLUIDS_TRANSPORTEDGE_H

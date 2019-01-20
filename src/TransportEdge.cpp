@@ -21,36 +21,32 @@
 // SOFTWARE.
 //
 
-#ifndef LIBFLUIDS_STATE_H
-#define LIBFLUIDS_STATE_H
-
-#include <memory>
-
-#include "Units.h"
+#include "TransportEdge.h"
 
 namespace Fluids {
 
-class State {
-public:
-  State();
-  State(const State &other);
-
-  State &operator=(const State &other);
-
-  virtual ~State() = default;
-
-  virtual const std::shared_ptr<quantity<si::velocity>> &Get_Speed() const;
-  virtual void Set_Speed(const std::shared_ptr<quantity<si::velocity>> &speed);
-
-  virtual const std::shared_ptr<quantity<si::pressure>> &Get_Static_pressure() const;
-  virtual void Set_Static_pressure(const std::shared_ptr<quantity<si::pressure>> &static_pressure);
-
-protected:
-  std::shared_ptr<quantity<si::pressure>> m_static_pressure;
-  std::shared_ptr<quantity<si::velocity>> m_speed;
-
-};
+TransportEdge::TransportEdge() : FluidComponents() {
 
 }
 
-#endif //LIBFLUIDS_STATE_H
+TransportEdge::TransportEdge(const std::shared_ptr<Liquid> &liquid_u, const std::shared_ptr<Liquid> &liquid_v)
+    : FluidComponents(liquid_u, liquid_v) {
+
+}
+TransportEdge::TransportEdge(const FluidComponents &other) : FluidComponents(other) {
+
+}
+
+FluidComponents &TransportEdge::operator=(const FluidComponents &other) {
+  return FluidComponents::operator=(other);
+}
+
+bool TransportEdge::isTransportEdge() const {
+  return true;
+}
+
+std::shared_ptr<quantity<si::volumetric_flow>> TransportEdge::Get_Volumetricflow() {
+  return m_volumetricflow;
+}
+
+}
