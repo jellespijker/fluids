@@ -157,9 +157,9 @@ TEST(SolverTest, SimpleSystem) {
                                             10. * si::meter,
                                             static_cast<quantity<si::length>>(46. * si::micrometers));
   sys->add_FluidComponent(p0, 0, 1);
+  sys->Initialize();
   sys->Set_Known_Speed(0, 2. * si::meters_per_second);
   sys->Set_Known_Static_Pressure(0, static_cast<quantity<si::pressure>>(2. * si::bar));
-  sys->Initialize();
 
   Fluids::Solver solver(sys);
 

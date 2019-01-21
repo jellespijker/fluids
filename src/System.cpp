@@ -25,6 +25,7 @@
 #include <random>
 
 #include <Eigen/Eigen>
+#include <fluids/System.h>
 
 #include "../include/fluids/System.h"
 #include "TransportEdge.h"
@@ -86,7 +87,7 @@ void System::Set_Known_Static_Pressure(const size_t &vertex_u, const quantity<si
 }
 
 size_t System::n_unknowns() {
-  return m_unknown_speeds.size() + m_unknown_static_pressures.size();
+  return m_unknown_speeds.size() + m_unknown_static_pressures.size() + m_unknown_volumetric_flows.size();
 }
 
 const shared_velocity_vector &System::Get_Known_speeds() const {
@@ -130,12 +131,27 @@ const Eigen::VectorXd System::Get_Bernoulli_vec() const {
 
 const Eigen::VectorXd System::Get_massflow_vec() const {
   std::vector<double> values;
+  values.push_back(0.); // System massflow
   auto vs = boost::vertices(m_graph);
   edge_t e;
   bool b;
   for (auto vit = vs.first; vit != vs.second; ++vit) {
-    if (boost::in_degree(*vit, m_graph) == 0 || boost::out_degree(*vit, m_graph) == 0)
-      continue; // Do nothing this is a leaf vertex
+    // Get system mass flows
+    if (boost::in_degree(*vit, m_graph) == 0) { // incoming system mass flow
+      typename boost::graph_traits<Graph>::out_edge_iterator eo, eo_end;
+      for (boost::tie(eo, eo_end) = boost::out_edges(*vit, m_graph); eo != eo_end; ++eo) {
+        boost::tie(e, b) = boost::edge(boost::source(*eo, m_graph), boost::target(*eo, m_graph), m_graph);
+        values[0] += m_graph[e]->Get_Massflow()->value();
+      }
+      continue;
+    } else if (boost::out_degree(*vit, m_graph) == 0) { // outgoing system mass flow
+      typename boost::graph_traits<Graph>::in_edge_iterator ei, ei_end;
+      for (boost::tie(ei, ei_end) = boost::in_edges(*vit, m_graph); ei != ei_end; ++ei) {
+        boost::tie(e, b) = boost::edge(boost::source(*ei, m_graph), boost::target(*ei, m_graph), m_graph);
+        values[0] -= m_graph[e]->Get_Massflow()->value();
+      }
+      continue;
+    }
     values.push_back(0.);
     // Get all incoming flows
     typename boost::graph_traits<Graph>::in_edge_iterator ei, ei_end;
@@ -173,10 +189,12 @@ void System::Initialize() {
       m_graph[u] = std::make_shared<Liquid>(*m_graph[v]);
       if (in_leaf) {
         boost::tie(e, b) = boost::add_edge(u, v, m_graph);
-        m_graph[e] = std::make_shared<TransportEdge>(m_graph[u] , m_graph[v]);
+        m_graph[e] = std::make_shared<TransportEdge>(m_graph[u], m_graph[v]);
+        m_unknown_volumetric_flows.push_back(m_graph[e]->Get_Volumetricflow());
       } else {
         boost::tie(e, b) = boost::add_edge(v, u, m_graph);
-        m_graph[e] = std::make_shared<TransportEdge>(m_graph[v] , m_graph[u]);
+        m_graph[e] = std::make_shared<TransportEdge>(m_graph[v], m_graph[u]);
+        m_unknown_volumetric_flows.push_back(m_graph[e]->Get_Volumetricflow());
       }
     }
     in_leaf = false;
@@ -185,11 +203,33 @@ void System::Initialize() {
 
 Eigen::VectorXd System::Get_Initial_vector() {
   Eigen::VectorXd initial_vec(n_unknowns());
-  initial_values<si::velocity>(m_known_speeds, si::meters_per_second, initial_vec,
-                               0, m_unknown_speeds.size(), 0.0, 10.0);
-  initial_values<si::pressure>(m_known_static_pressures, si::pascal, initial_vec,
-                               m_unknown_speeds.size(), n_unknowns(), 1.0e5, 10.0e5);
+  initial_values<si::velocity>(m_known_speeds,
+                               si::meters_per_second,
+                               initial_vec,
+                               0,
+                               m_unknown_speeds.size(),
+                               0.0, 10.0);
+  initial_values<si::pressure>(m_known_static_pressures,
+                               si::pascal,
+                               initial_vec,
+                               m_unknown_speeds.size(),
+                               m_unknown_speeds.size() + m_unknown_static_pressures.size(),
+                               1.0e5, 10.0e5);
+  initial_values<si::volumetric_flow>(m_known_volumetric_flows,
+                                      si::cubic_meters_per_second,
+                                      initial_vec,
+                                      m_unknown_speeds.size() + m_unknown_static_pressures.size(),
+                                      n_unknowns(),
+                                      1., 100.);
   return initial_vec;
+}
+
+const shared_volumetric_flow_vector &System::Get_Unknown_volumetric_flow() const {
+  return m_unknown_volumetric_flows;
+}
+
+const shared_volumetric_flow_vector &System::Get_Known_volumetric_flow() const {
+  return m_known_volumetric_flows;
 }
 
 }

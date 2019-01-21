@@ -47,6 +47,7 @@ typedef boost::graph_traits<Graph>::edge_descriptor edge_t;
 
 typedef std::vector<std::shared_ptr<quantity<si::velocity>>> shared_velocity_vector;
 typedef std::vector<std::shared_ptr<quantity<si::pressure>>> shared_pressure_vector;
+typedef std::vector<std::shared_ptr<quantity<si::volumetric_flow>>> shared_volumetric_flow_vector;
 
 class System {
 public:
@@ -72,6 +73,9 @@ public:
   const shared_velocity_vector &Get_Unknown_speeds() const;
   const shared_pressure_vector &Get_Known_static_pressures() const;
   const shared_pressure_vector &Get_Unknown_static_pressures() const;
+  const shared_volumetric_flow_vector &Get_Unknown_volumetric_flow() const;
+  const shared_volumetric_flow_vector &Get_Known_volumetric_flow() const;
+
   const Eigen::VectorXd Get_Return_vec() const;
   const Graph &Get_Graph() const;
 
@@ -81,6 +85,8 @@ private:
   shared_velocity_vector m_unknown_speeds;
   shared_pressure_vector m_known_static_pressures;
   shared_pressure_vector m_unknown_static_pressures;
+  shared_volumetric_flow_vector m_known_volumetric_flows;
+  shared_volumetric_flow_vector m_unknown_volumetric_flows;
 
   const Eigen::VectorXd Get_Bernoulli_vec() const;
   const Eigen::VectorXd Get_massflow_vec() const;

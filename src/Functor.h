@@ -73,13 +73,19 @@ public:
     // Set unknown values from x-vector
     auto speed = m_system->Get_Unknown_speeds();
     auto pressure = m_system->Get_Unknown_static_pressures();
+    auto volumetric_flows = m_system->Get_Unknown_volumetric_flow();
     size_t n_speed = speed.size();
     size_t n_pressure = pressure.size();
+    size_t n_volumetric_flows = volumetric_flows.size();
     for (size_t i = 0; i < n_speed; ++i) {
       *speed[i] = x(i) * si::meter_per_second; // TODO write more generic get unit from type
     }
     for (size_t j = n_speed; j < n_speed + n_pressure; ++j) {
-      *pressure[n_speed - j] = x(j) * si::pascals; // TODO write more generic get unit from type
+      *pressure[j - n_speed] = x(j) * si::pascals; // TODO write more generic get unit from type
+    }
+    size_t offset = n_speed + n_pressure;
+    for (size_t k = offset; k < offset + n_volumetric_flows; ++k) {
+      *volumetric_flows[k - offset] = x(k) * si::cubic_meters_per_second;
     }
 
     dvec = m_system->Get_Return_vec();
